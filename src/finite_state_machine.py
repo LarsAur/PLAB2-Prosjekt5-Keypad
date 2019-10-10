@@ -1,10 +1,13 @@
 class FSM:
 
-    def __init__(self, agent):
+    def __init__(self):
         self.rule_list = []
         self.state = "S-Init"
         self.signal = None
-        self.agent = agent
+        self.agent = KPC()
+        
+    def set_new_state(self, state):
+        self.state = state
 
     def add_rule(self, rule):
         """Adding a rule to the fsm"""
