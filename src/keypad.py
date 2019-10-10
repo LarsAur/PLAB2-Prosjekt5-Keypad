@@ -8,12 +8,12 @@ class Keypad:
         self.col_pins = [17, 27, 22]
         self.row_pins = [18, 23, 24, 25]
         # Indexed with (column_pin, row_pin)
-        self.pins_to_key = {(17, 18):1, (17, 23):4, (17, 24):7, (17, 25):"*",
-                           (27, 18):2, (27, 23):5, (27, 24):8, (27, 25):0,
-                           (22, 18):3, (22, 23):6, (22, 24):9, (22, 25):"#" }
+        self.pins_to_key = {(17, 18): 1, (17, 23): 4, (17, 24): 7, (17, 25): "*",
+                            (27, 18): 2, (27, 23): 5, (27, 24): 8, (27, 25): 0,
+                            (22, 18): 3, (22, 23): 6, (22, 24): 9, (22, 25): "#"}
 
         self.poll_repeat_checks = 20
-        self.poll_delay = 0.010 #10ms
+        self.poll_delay = 0.010  # 10ms
 
     def setup(self):
         """Setting up GPIO pins for the keypad"""
@@ -38,10 +38,10 @@ class Keypad:
                         break
                     else:
                         repeat += 1
-                
+
                 if repeat == self.poll_repeat_checks:
                     return (cpin, rpin)
-                    
+
             GPIO.output(rpin, GPIO.LOW)
 
         return None
@@ -52,9 +52,10 @@ class Keypad:
         polled_pins = None
         while not polled_pins:
             polled_pins = self.do_polling()
-        
+
         return self.pins_to_key[polled_pins]
-            
+
+
 if __name__ == "__main__":
     #
     kp = Keypad()
