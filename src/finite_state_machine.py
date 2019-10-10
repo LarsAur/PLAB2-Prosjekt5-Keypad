@@ -8,20 +8,32 @@ class FSM:
 
 
   def add_rule(self, rule):
+    """Adding a rule to the fsm"""
     self.rule_list.append(rule)
 
 
   def get_next_signal(self):
-    pass 
+    """Query the agent for the next signal."""
+    self.agent.get_next_signal()
   
   def run_rules(self):
-    pass
+    for rule in self.rule_list:
+      if self.apply_rule(rule):
+        self.fire_rule(rule)
+      
+  def apply_rule(self, rule):
+    """Returns if the rule matches the current state and signal"""
+    return rule.match(self.state, self.signal)
 
-  def apply_rule(self):
-    pass
-
-  def fire_rule(self):
-    pass
+  def fire_rule(self, rule):
+    """Sets the new state of the fsm and fires the method from rule"""
+    self.state = rule.state2
+    rule.action(self.agent, self.signal)
 
   def main_loop(self):
-    pass
+    """Sets the current stat to init-state and runs the fsm in a loop, asking for input"""
+    self.state = "S-Init"
+    #TODO end on final state
+    while True:
+      self.signal = self.agent.get_next_signal()
+      self.run_rules()

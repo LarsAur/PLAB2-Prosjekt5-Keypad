@@ -1,27 +1,30 @@
+#from keypad import Keypad
+#from led_board import LED
+
 class KPC:
 
     def __init__(self):
-        self.keypad = Keypad()
-        self.led_board = LED()
+        #self.keypad = Keypad()
+        #self.led_board = LED()
         self.passcode_buffer = []
-        self.filename = ""
+        self.filename = "password.txt"
         self.override_signal = None
         self.led_id = ""
         self.led_duration = ""
         self.password = self.get_password(self.filename)
 
     def get_password(self, filename):
-        # Gets password from file. If no password is saved
-        # in the file, it makes a standard password set to '1234'.
+        """Gets password from file. If no password is saved
+        in the file, it makes a standard password set to '1234'"""
         with open(filename) as f:
             password = f.read()
-            password = password.strip()
+            password = password.strip() # removes leading whitespace
             if not password:
                 password = '1234'
             return password
 
     def save_password(self, filename, password):
-        # Updates and saves the password to file
+        """Updates and saves the password to file"""
         with open(filename, "w") as f:
             f.write(password)
 
@@ -35,10 +38,10 @@ class KPC:
     def get_next_signal(self):
         # Return the override-signal, if it is non-blank;
         # otherwise query the keypad for the next pressed key.
-        if not (self.override_signal is None):
+        if self.override_signal:
             return self.override_signal
         else:
-            return
+            return self.keypad.get_next
 
     def verify_login(self):
         # Check that the password just entered via the keypad
@@ -101,3 +104,8 @@ class KPC:
     def exit_action(self):
         #Call the LED Board to initiate the ”power down” lighting sequence.
         self.led_board.leds_powering_down()
+
+
+if __name__ == "__main__":
+    kpc = KPC()
+    

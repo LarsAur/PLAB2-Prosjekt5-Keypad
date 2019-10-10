@@ -3,8 +3,6 @@ import RPi.GPIO as GPIO
 
 class Keypad:
 
-    
-
     def __init__(self):
         """Initializes all pins and a pins_to_key dictionary"""
         self.col_pins = [17, 27, 22]
