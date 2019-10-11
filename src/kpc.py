@@ -11,10 +11,12 @@ class KPC:
         # self.fsm = FSM()
         self.passcode_buffer = []
         self.filename = "password.txt"
-        self.override_signal = None
+        self.override_signal = ""
         self.led_id = None
         self.led_duration = None
         self.password = self.get_password(self.filename)
+        self.new_password_cache = []
+        self.fully_active_rules = []
 
     def get_password(self, filename):
         """Gets password from file. If no password is saved
@@ -42,7 +44,9 @@ class KPC:
         """Return the override-signal, if it is non-blank;
         otherwise query the keypad for the next pressed key."""
         if self.override_signal:
-            return self.override_signal
+            override_signal = self.override_signal
+            self.override_signal = ""
+            return override_signal
         else:
             return self.keypad.get_next_signal()
 
@@ -51,36 +55,36 @@ class KPC:
         matches that in the password file. Store the result (Y or N)
         in the override-signal. Also, this should call the
         LED Board to initiate the appropriate lighting pattern for login success or failure."""
-        password = ''.join(self.passcode_buffer)
-        self.passcode_buffer = []
-        if password == self.password:
+        passcode_buffer = ''.join(self.passcode_buffer)
+        self.reset_passcode_buffer()
+        if passcode_buffer == self.password:
             self.led_board.twinkle_all_leds(3)
-            self.fsm.set_new_state("S-Active")
-            return True
+            self.override_signal = "Y"
         else:
             self.led_board.flash_all_leds(3)
-            self.fsm.set_new_state("S-Init")
-            self.reset_agent()
-            return False
+            self.override_signal = "N"
 
     def validate_passcode_change(self):
         """Check that the new password is legal. If so, write the
         new password in the password file. Should be at least 4 digits
         long and only contain digits 0-9. Uses the LED Board to signal
         success or failure in changing the password"""
-        if len(self.passcode_buffer) < 4:
+        passcode_buffer = self.passcode_buffer
+        new_password_cache = self.new_password_cache
+        self.reset_passcode_buffer()
+        if len(passcode_buffer) < 4:
             self.led_board.flash_all_leds(3)
-            self.reset_passcode_buffer()
             return False
-        for letter in self.passcode_buffer:
+        for letter in passcode_buffer:
             if not letter.isdigit():
                 self.led_board.flash_all_leds(3)
-                self.reset_passcode_buffer()
                 return False
-        self.password = ''.join(self.passcode_buffer)
-        self.save_password(self.filename, self.password)
-        self.reset_passcode_buffer()
-        self.led_board.twinkle_all_leds(3)
+        if not new_password_cache:
+            self.new_password_cache = passcode_buffer
+        elif passcode_buffer == new_password_cache:
+            self.password = ''.join(passcode_buffer)
+            self.save_password(self.filename, self.password)
+            self.led_board.twinkle_all_leds(3)
         return True
 
     def reset_agent(self):
@@ -90,6 +94,8 @@ class KPC:
         self.led_id = ""
         self.led_duration = ""
         self.password = self.get_password(self.filename)
+        self.new_password_cache = []
+
 
     def set_led_duration(self, led_duration):
         """sets led_id"""
@@ -100,15 +106,20 @@ class KPC:
         self.led_id = led_id
 
     def fully_activate_agent(self):
+        for rule in self.fully_active_rules:
+            self.fsm.add_rule(rule)
+
+    def logout(self):
         pass
 
     def append_next_password_digit(self, digit):
-        """adds (hopefully) a digit to the passcode buffer"""
+        """adds a digit to the passcode buffer"""
         self.passcode_buffer.append(digit)
 
     def reset_passcode_buffer(self):
         """resets passcode_buffer"""
         self.passcode_buffer = []
+        self.new_password_cache = []
 
     def light_one_led(self):
         """Using values stored in the Lid and Ldur slots, call the
