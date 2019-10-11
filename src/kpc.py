@@ -1,6 +1,7 @@
 # from keypad import Keypad
 # from led_board import LED
 # from finite_state_machine import FSM
+# from rule import *
 
 
 class KPC:
@@ -16,7 +17,23 @@ class KPC:
         self.led_duration = None
         self.password = self.get_password(self.filename)
         self.new_password_cache = []
-        self.fully_active_rules = []
+        self.init_rules = [
+            Rule("S-Init", "S-Read", all_symbols, self.reset_passcode_buffer()),
+            Rule("S-Read", "S-Read", signal_is_digit, self.append_next_password_digit()),
+            Rule("S-Read", "S-Verify", "*", self.verify_login()),
+            Rule("S-Read", "S-Init", all_symbols, self.reset_agent()),
+            Rule("S-Verify", "S-Active", "Y", self.fully_activate_agent()),
+            Rule("S-Verify", "S-Read", "N", self.reset_agent())
+        ]
+        self.fully_active_rules = [
+            Rule("S-Active", "S-Read-2", "*", self.reset_passcode_buffer()),
+            Rule("S-Read-2", "S-Read-2", signal_is_digit, self.append_next_password_digit()),
+            Rule("S-Read-2", "S-Read-3", "*", self.validate_passcode_change),
+            Rule("S-Read-2", "S-Active", all_symbols, self.refresh_agent()),
+            Rule("S-Read-3", "S-Read-3", signal_is_digit, self.append_next_password_digit()),
+            Rule("S-Read-3", "S-Active", "*", self.validate_passcode_change),
+            Rule("S-Read-3", "S-Active", all_symbols, self.refresh_agent())
+        ]
 
     def get_password(self, filename):
         """Gets password from file. If no password is saved
@@ -89,12 +106,8 @@ class KPC:
 
     def reset_agent(self):
         """initializes fields as defined in init"""
-        self.reset_passcode_buffer()
-        self.override_signal = None
-        self.led_id = ""
-        self.led_duration = ""
-        self.password = self.get_password(self.filename)
-        self.new_password_cache = []
+        self.refresh_agent()
+        self.fsm.rule_list = self.init_rules
 
 
     def set_led_duration(self, led_duration):
@@ -106,11 +119,19 @@ class KPC:
         self.led_id = led_id
 
     def fully_activate_agent(self):
+        """adds all rules for a fully active fsm to the fsm rule_list"""
         for rule in self.fully_active_rules:
             self.fsm.add_rule(rule)
 
-    def logout(self):
-        pass
+    def refresh_agent(self):
+        """does the same as the reset_agent method except removing the
+        fully active rules so the state of the fsm is still active"""
+        self.reset_passcode_buffer()
+        self.override_signal = None
+        self.led_id = ""
+        self.led_duration = ""
+        self.password = self.get_password(self.filename)
+        self.new_password_cache = []
 
     def append_next_password_digit(self, digit):
         """adds a digit to the passcode buffer"""
