@@ -34,6 +34,15 @@ class LED:
         GPIO.output(led_order[3], GPIO.HIGH)
         GPIO.output(led_order[4], GPIO.LOW)
 
+    def flash_one_led(self, led_id, led_duration):
+        """Flash one chosen of the 6 LEDs on for k seconds,
+        where k is an argument of the method."""
+        timeout = led_duration  # [seconds]
+        timeout_start = time.time()
+        while time.time() < timeout_start + timeout:
+            self.light_led(led_id)
+        self.light_off_led()
+
     def light_off_led(self):
         """Turn off all LEDs"""
         GPIO.setup(self.pin0, GPIO.IN)
