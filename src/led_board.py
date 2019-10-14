@@ -1,11 +1,11 @@
-'''The class handling the LED board'''
+"""The class handling the LED board"""
 
 import time
 import RPi.GPIO as GPIO
 
 
 class LED:
-    '''The lED class'''
+    """The lED class"""
 
     def __init__(self):
         self.pin0 = 6

@@ -13,7 +13,7 @@ def all_symbols():
 
 
 class Rule:
-    '''The rule class'''
+    """The rule class"""
 
     def __init__(self, state1, state2, signal, action):
         self.state1 = state1
@@ -22,7 +22,7 @@ class Rule:
         self.action = action
 
     def match(self, state, symbol):
-        '''Checks if correct state, and execute operation'''
+        """Checks if correct state, and execute operation"""
         if state == self.state1:
             if isfunction(self.signal):
                 return self.signal(str(symbol))
