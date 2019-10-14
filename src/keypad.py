@@ -39,7 +39,7 @@ class Keypad:
                         return (self.col_pins[cpin], self.row_pins[rpin])
 
                 GPIO.output(self.row_pins[rpin], GPIO.LOW)
-                time.sleep(self.poll_delay)
+        time.sleep(self.poll_delay)
         return None
 
 
