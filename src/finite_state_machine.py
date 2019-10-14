@@ -1,10 +1,12 @@
+from finite_state_machine import KPC
+
 class FSM:
 
-    def __init__(self, agent):
-        self.rule_list = []
+    def __init__(self):
         self.state = "S-Init"
         self.signal = None
-        self.agent = agent
+        self.agent = KPC()
+        self.rule_list = self.agent.init_rules  # gets init rules from agent
 
     def add_rule(self, rule):
         """Adding a rule to the fsm"""
