@@ -1,6 +1,9 @@
-from inspect import signature
+"""The finite state machine class"""
+from kpc import KPC
+
 
 class FSM:
+    """The finite state machine class"""
 
     def __init__(self, agent):
         self.state = "S-Init"
@@ -17,6 +20,7 @@ class FSM:
         self.agent.get_next_signal()
 
     def run_rules(self):
+        """Runs through the rules"""
         for rule in self.rule_list:
             if self.apply_rule(rule):
                 self.fire_rule(rule)
