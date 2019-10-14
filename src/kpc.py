@@ -11,7 +11,7 @@ class KPC:
         self.led_board = LED()
         self.led_board.setup()
         self.passcode_buffer = []
-        self.filename = "password.txt"
+        self.filename = "../password.txt"
         self.override_signal = None
         self.led_id = None
         self.led_duration = None

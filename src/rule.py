@@ -6,7 +6,7 @@ def signal_is_digit(signal):
     return 48 <= ord(signal) <= 57
 
 
-def all_symbols():
+def all_symbols(signal):
     '''Acknowledges that all input is signal'''
     return True
 
