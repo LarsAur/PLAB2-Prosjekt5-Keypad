@@ -17,7 +17,7 @@ class Rule:
     def match(self, state, symbol):
         if state == self.state1:
             if isfunction(self.signal):
-                return self.signal(str(symbol))
+                return self.signal(symbol)
             else:
                 return symbol == self.signal
         return False

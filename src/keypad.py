@@ -8,9 +8,9 @@ class Keypad:
         self.col_pins = [17, 27, 22]
         self.row_pins = [18, 23, 24, 25]
         # Indexed with (column_pin, row_pin)
-        self.pins_to_key = {(17, 18): 1, (17, 23): 4, (17, 24): 7, (17, 25): "*",
-                            (27, 18): 2, (27, 23): 5, (27, 24): 8, (27, 25): 0,
-                            (22, 18): 3, (22, 23): 6, (22, 24): 9, (22, 25): "#"}
+        self.pins_to_key = {(17, 18): '1', (17, 23): '4', (17, 24): '7', (17, 25): '*',
+                            (27, 18): '2', (27, 23): '5', (27, 24): '8', (27, 25): '0',
+                            (22, 18): '3', (22, 23): '6', (22, 24): '9', (22, 25): '#'}
 
         self.poll_repeat_checks = 20
         self.poll_delay = 0.010  # 10ms
@@ -27,24 +27,21 @@ class Keypad:
 
     def do_polling(self):
         """Polls the keypad buttons for buttonpresses, returns the pin values of the button"""
-        for rpin in self.row_pins:
-            GPIO.output(rpin, GPIO.HIGH)
-            for cpin in self.col_pins:
-                repeat = 0
-                # checks the pin 20 times with a delay of 10ms
-                for i in range(self.poll_repeat_checks):
-                    time.sleep(self.poll_delay)
-                    if GPIO.input(cpin) == GPIO.LOW:
-                        break
-                    else:
-                        repeat += 1
+        repeats = [[0 for i in range(len(self.row_pins))] for j in range(len(self.col_pins))]
+        # checks the pin 20 times with a delay of 10ms  
+        for i in range(self.poll_repeat_checks):
+            for rpin in range(len(self.row_pins)):
+                GPIO.output(self.row_pins[rpin], GPIO.HIGH)
+                for cpin in range(len(self.col_pins)):                   
+                    if GPIO.input(self.col_pins[cpin]) == GPIO.HIGH:
+                        repeats[cpin][rpin] += 1
+                    if repeats[cpin][rpin] == self.poll_repeat_checks:
+                        return (self.col_pins[cpin], self.row_pins[rpin])
 
-                if repeat == self.poll_repeat_checks:
-                    return (cpin, rpin)
-
-            GPIO.output(rpin, GPIO.LOW)
-
+                GPIO.output(self.row_pins[rpin], GPIO.LOW)
+                time.sleep(self.poll_delay)
         return None
+
 
     def get_next_signal(self):
         """ This is the main interface between the agent and the keypad. It should
@@ -57,7 +54,7 @@ class Keypad:
 
 
 if __name__ == "__main__":
-    #
+
     kp = Keypad()
     kp.setup()
     GPIO.setup(26, GPIO.OUT)

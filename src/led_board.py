@@ -1,5 +1,4 @@
 '''The class handling the LED board'''
-
 import RPi.GPIO as GPIO
 import time
 

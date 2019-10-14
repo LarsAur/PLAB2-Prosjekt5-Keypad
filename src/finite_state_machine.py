@@ -1,11 +1,11 @@
-from finite_state_machine import KPC
+from inspect import signature
 
 class FSM:
 
-    def __init__(self):
+    def __init__(self, agent):
         self.state = "S-Init"
         self.signal = None
-        self.agent = KPC()
+        self.agent = agent
         self.rule_list = self.agent.init_rules  # gets init rules from agent
 
     def add_rule(self, rule):
@@ -28,12 +28,17 @@ class FSM:
     def fire_rule(self, rule):
         """Sets the new state of the fsm and fires the method from rule"""
         self.state = rule.state2
-        rule.action(self.agent, self.signal)
+        sig = signature(rule.action)
+
+        self.agent.led_board.flash_all_leds(2)
+
+        if(len(sig.parameters)==1) and not self.signal is None:
+            rule.action(self.signal)
+        else:
+            rule.action()
 
     def main_loop(self):
         """Sets the current stat to init-state and runs the fsm in a loop, asking for input"""
-        self.state = "S-Init"
-        # TODO end on final state
         while True:
             self.signal = self.agent.get_next_signal()
             self.run_rules()
