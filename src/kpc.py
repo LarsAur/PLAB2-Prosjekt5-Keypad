@@ -1,6 +1,7 @@
 #from keypad import Keypad
 #from led_board import LED
 
+
 class KPC:
 
     def __init__(self):
@@ -18,7 +19,7 @@ class KPC:
         in the file, it makes a standard password set to '1234'"""
         with open(filename) as f:
             password = f.read()
-            password = password.strip() # removes leading whitespace
+            password = password.strip()  # removes leading whitespace
             if not password:
                 password = '1234'
             return password
@@ -89,23 +90,21 @@ class KPC:
         pass
 
     def light_one_led(self):
-        #Using values stored in the Lid and Ldur slots, call the #LED Board and request that LED Lid be turned on for #Ldur seconds.
+        # Using values stored in the Lid and Ldur slots, call the #LED Board and request that LED Lid be turned on for #Ldur seconds.
         self.led_board.light_led(self.led_id, self.led_duration)
-    
+
     def flash_leds(self):
-        #Call the LED Board and request the flashing of all LEDs.
+        # Call the LED Board and request the flashing of all LEDs.
         self.led_board.flash_all_leds()
-    
+
     def twinkle_leds(self):
-        #Call the LED Board and request the twinkling of all LEDs.
+        # Call the LED Board and request the twinkling of all LEDs.
         self.led_board.twinkle_all_leds()
-    
-    
+
     def exit_action(self):
-        #Call the LED Board to initiate the ”power down” lighting sequence.
+        # Call the LED Board to initiate the ”power down” lighting sequence.
         self.led_board.leds_powering_down()
 
 
 if __name__ == "__main__":
     kpc = KPC()
-    
