@@ -24,7 +24,7 @@ class KPC:
             Rule("S-Read", "S-Verify", "*", self.verify_login),
             Rule("S-Read", "S-Init", all_symbols, self.reset_agent),
             Rule("S-Verify", "S-Active", "Y", self.fully_activate_agent),
-            Rule("S-Verify", "S-Read", "N", self.failed_login)
+            Rule("S-Verify", "S-Read", "N", self.reset_agent)
         ]
         self.fully_active_rules = [
             Rule("S-Active", "S-Read-2", "*", self.reset_passcode_buffer),
@@ -91,8 +91,10 @@ class KPC:
         self.reset_passcode_buffer()
         if passcode_buffer == self.password:
             self.override_signal = "Y"
+            self.led_board.twinkle_all_leds(3)
         else:
             self.override_signal = "N"
+            self.led_board.flash_one_led(1, 1)
 
     def validate_passcode_change(self):
         """Check that the new password is legal. If so, write the
@@ -112,11 +114,10 @@ class KPC:
         elif passcode_buffer == new_password_cache:
             self.password = ''.join(passcode_buffer)
             self.save_password(self.filename, self.password)
+            self.led_board.flash_one_led(0, 0.7)
+            self.led_board.flash_one_led(4, 0.7)
+            self.led_board.flash_one_led(2, 0.7)
         return True
-
-    def failed_login(self):
-        self.led_board.flash_one_led(1, 1)
-        self.reset_agent()
 
     def reset_agent(self):
         """initializes fields as defined in init"""
@@ -131,16 +132,14 @@ class KPC:
         """sets led_id"""
         self.led_duration = int("".join(self.led_duration_buffer))
         self.led_duration_buffer = []
+        self.light_one_led()
 
     def set_led_id(self, led_id):
         """sets let_duration"""
-        self.led_id = led_id
+        self.led_id = int(led_id)
 
     def fully_activate_agent(self):
         """adds all rules for a fully active fsm to the fsm rule_list"""
-
-        self.led_board.twinkle_all_leds(3)
-
         for rule in self.fully_active_rules:
             self.fsm.add_rule(rule)
 
@@ -164,13 +163,14 @@ class KPC:
 
     def exit_action(self):
         """Call the LED Board to initiate the ”power down” lighting sequence."""
+        self.led_board.leds_powering_down()
         self.reset_agent()
 
-"""     def light_one_led(self):
- """        """Using values stored in the Lid and Ldur slots, call the
+    def light_one_led(self):
+        """Using values stored in the Lid and Ldur slots, call the
         LED Board and request that LED Lid be turned on for Ldur seconds."""
-"""         self.led_board.light_led(self.led_id)
- """
+        self.led_board.flash_one_led(self.led_id, self.led_duration)
+
 """     def flash_leds(self):
  """        """Call the LED Board and request the flashing of all LEDs."""
 """         self.led_board.flash_all_leds(self.led_duration)
