@@ -67,7 +67,7 @@ class LED:
         while time.time() < timeout_start + timeout:
             for i in range(6):
                 self.light_led(i)
-                time.sleep(0.1)
+                time.sleep(0.01)
         self.light_off_led()
 
     def leds_powering_up(self):

@@ -15,6 +15,7 @@ class KPC:
         self.override_signal = None
         self.led_id = None
         self.led_duration = None
+        self.led_duration_buffer = []
         self.password = self.get_password(self.filename)
         self.new_password_cache = []
         self.init_rules = [
@@ -27,6 +28,11 @@ class KPC:
         ]
         self.fully_active_rules = [
             Rule("S-Active", "S-Read-2", "*", self.reset_passcode_buffer),
+            Rule("S-Active", "S-LED", signal_0_to_5, self.set_led_id),
+            Rule("S-LED", "S-LED", singal_0_to_5, self.set_led_id),
+            Rule("S-LED", "S-Time", "*", self.nop),
+            Rule("S-Time", "S-Time", signal_is_digit, self.append_next_led_duration_digit),
+            Rule("S-Time", "S-Active", "*", self.set_led_duration),
             Rule("S-Read-2", "S-Read-2", signal_is_digit, self.append_next_password_digit),
             Rule("S-Read-2", "S-Read-3", "*", self.validate_passcode_change),
             Rule("S-Read-2", "S-Active", all_symbols, self.refresh_agent),
@@ -38,6 +44,9 @@ class KPC:
 
         self.fsm = FSM(self)
         self.fsm.main_loop()
+
+    def nop(self):
+        pass
 
     def get_password(self, filename):
         """Gets password from file. If no password is saved
@@ -113,10 +122,14 @@ class KPC:
         self.refresh_agent()
         self.fsm.rule_list = self.init_rules
 
+    def append_next_led_duration_digit(self, digit):
+        self.led_duration_buffer.append(digit)
 
-    def set_led_duration(self, led_duration):
+
+    def set_led_duration(self):
         """sets led_id"""
-        self.led_duration = led_duration
+        self.led_duration = int("".join(self.led_duration_buffer))
+        self.led_duration_buffer = []
 
     def set_led_id(self, led_id):
         """sets let_duration"""

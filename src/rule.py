@@ -5,6 +5,9 @@ def signal_is_digit(signal):
     '''Validates that signal is an integer 0 - 9'''
     return 48 <= ord(signal) <= 57
 
+def singal_0_to_5(signal):
+    return 48 <= ord(signal) <= 53
+
 
 def all_symbols(signal):
     '''Acknowledges that all input is signal'''
