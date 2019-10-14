@@ -12,7 +12,7 @@ class KPC:
         self.led_board.setup()
         self.passcode_buffer = []
         self.filename = "password.txt"
-        self.override_signal = ""
+        self.override_signal = None
         self.led_id = None
         self.led_duration = None
         self.password = self.get_password(self.filename)
@@ -64,9 +64,9 @@ class KPC:
     def get_next_signal(self):
         """Return the override-signal, if it is non-blank;
         otherwise query the keypad for the next pressed key."""
-        if self.override_signal is not "":
+        if self.override_signal:
             override_signal = self.override_signal
-            self.override_signal = ""
+            self.override_signal = None
             return override_signal
         else:
             return self.keypad.get_next_signal()

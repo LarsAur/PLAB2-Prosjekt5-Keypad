@@ -1,7 +1,6 @@
 '''The rule navigation class'''
 from inspect import isfunction
 
-
 def signal_is_digit(signal):
     '''Validates that signal is an integer 0 - 9'''
     return 48 <= ord(signal) <= 57
@@ -10,7 +9,6 @@ def signal_is_digit(signal):
 def all_symbols():
     '''Acknowledges that all input is signal'''
     return True
-
 
 class Rule:
     """The rule class"""

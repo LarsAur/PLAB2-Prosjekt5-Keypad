@@ -1,6 +1,5 @@
 """The finite state machine class"""
-from kpc import KPC
-
+from inspect import signature
 
 class FSM:
     """The finite state machine class"""
@@ -24,6 +23,7 @@ class FSM:
         for rule in self.rule_list:
             if self.apply_rule(rule):
                 self.fire_rule(rule)
+                return
 
     def apply_rule(self, rule):
         """Returns if the rule matches the current state and signal"""
