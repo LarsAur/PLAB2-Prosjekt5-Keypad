@@ -50,6 +50,9 @@ class Keypad:
         while not polled_pins:
             polled_pins = self.do_polling()
 
+        # Add sleeptime to stop multiple button pushes
+        time.sleep(0.5)
+
         return self.pins_to_key[polled_pins]
 
 

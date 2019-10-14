@@ -19,17 +19,17 @@ class KPC:
         self.password = self.get_password(self.filename)
         self.new_password_cache = []
         self.init_rules = [
-            Rule("S-Init", "S-Read", all_symbols, self.reset_passcode_buffer),
+            Rule("S-Init", "S-Read", all_symbols, self.init_passcode_entry),
             Rule("S-Read", "S-Read", signal_is_digit, self.append_next_password_digit),
             Rule("S-Read", "S-Verify", "*", self.verify_login),
             Rule("S-Read", "S-Init", all_symbols, self.reset_agent),
             Rule("S-Verify", "S-Active", "Y", self.fully_activate_agent),
-            Rule("S-Verify", "S-Init", "N", self.reset_agent)
+            Rule("S-Verify", "S-Read", "N", self.failed_login)
         ]
         self.fully_active_rules = [
             Rule("S-Active", "S-Read-2", "*", self.reset_passcode_buffer),
             Rule("S-Active", "S-LED", signal_0_to_5, self.set_led_id),
-            Rule("S-LED", "S-LED", singal_0_to_5, self.set_led_id),
+            Rule("S-LED", "S-LED", signal_0_to_5, self.set_led_id),
             Rule("S-LED", "S-Time", "*", self.nop),
             Rule("S-Time", "S-Time", signal_is_digit, self.append_next_led_duration_digit),
             Rule("S-Time", "S-Active", "*", self.set_led_duration),
@@ -39,7 +39,9 @@ class KPC:
             Rule("S-Read-3", "S-Read-3", signal_is_digit, self.append_next_password_digit),
             Rule("S-Read-3", "S-Active", "*", self.validate_passcode_change),
             Rule("S-Read-3", "S-Active", all_symbols, self.refresh_agent),
-            Rule("S-Active", "S-Init", "#", self.exit_action)
+            Rule("S-Active", "S-Logout", "#", self.nop),
+            Rule("S-Logout", "S-Init", "#", self.exit_action),
+            Rule("S-Logout", "S-Active", all_symbols, self.nop)
         ]
 
         self.fsm = FSM(self)
@@ -68,7 +70,7 @@ class KPC:
         lighting sequence on the LED Board. This should be done
         when the user first presses the keypad."""
         self.reset_passcode_buffer()
-        self.led_board.leds_powering_up
+        self.led_board.leds_powering_up()
 
     def get_next_signal(self):
         """Return the override-signal, if it is non-blank;
@@ -88,10 +90,8 @@ class KPC:
         passcode_buffer = ''.join(self.passcode_buffer)
         self.reset_passcode_buffer()
         if passcode_buffer == self.password:
-            self.led_board.twinkle_all_leds(3)
             self.override_signal = "Y"
         else:
-            self.led_board.flash_all_leds(3)
             self.override_signal = "N"
 
     def validate_passcode_change(self):
@@ -103,19 +103,20 @@ class KPC:
         new_password_cache = self.new_password_cache
         self.reset_passcode_buffer()
         if len(passcode_buffer) < 4:
-            self.led_board.flash_all_leds(3)
             return False
         for letter in passcode_buffer:
             if not letter.isdigit():
-                self.led_board.flash_all_leds(3)
                 return False
         if not new_password_cache:
             self.new_password_cache = passcode_buffer
         elif passcode_buffer == new_password_cache:
             self.password = ''.join(passcode_buffer)
             self.save_password(self.filename, self.password)
-            self.led_board.twinkle_all_leds(3)
         return True
+
+    def failed_login(self):
+        self.led_board.flash_one_led(1, 1)
+        self.reset_agent()
 
     def reset_agent(self):
         """initializes fields as defined in init"""
@@ -137,6 +138,9 @@ class KPC:
 
     def fully_activate_agent(self):
         """adds all rules for a fully active fsm to the fsm rule_list"""
+
+        self.led_board.twinkle_all_leds(3)
+
         for rule in self.fully_active_rules:
             self.fsm.add_rule(rule)
 
@@ -145,10 +149,9 @@ class KPC:
         fully active rules so the state of the fsm is still active"""
         self.reset_passcode_buffer()
         self.override_signal = None
-        self.led_id = ""
-        self.led_duration = ""
+        self.led_id = 1
+        self.led_duration = 1
         self.password = self.get_password(self.filename)
-        self.new_password_cache = []
 
     def append_next_password_digit(self, digit):
         """adds a digit to the passcode buffer"""
@@ -159,23 +162,23 @@ class KPC:
         self.passcode_buffer = []
         self.new_password_cache = []
 
-    def light_one_led(self):
-        """Using values stored in the Lid and Ldur slots, call the
-        LED Board and request that LED Lid be turned on for Ldur seconds."""
-        self.led_board.light_led(self.led_id)
-
-    def flash_leds(self):
-        """Call the LED Board and request the flashing of all LEDs."""
-        self.led_board.flash_all_leds(self.led_duration)
-
-    def twinkle_leds(self):
-        """Call the LED Board and request the twinkling of all LEDs."""
-        self.led_board.twinkle_all_leds(self.led_duration)
-
     def exit_action(self):
         """Call the LED Board to initiate the ”power down” lighting sequence."""
-        self.led_board.leds_powering_down()
+        self.reset_agent()
 
+"""     def light_one_led(self):
+ """        """Using values stored in the Lid and Ldur slots, call the
+        LED Board and request that LED Lid be turned on for Ldur seconds."""
+"""         self.led_board.light_led(self.led_id)
+ """
+"""     def flash_leds(self):
+ """        """Call the LED Board and request the flashing of all LEDs."""
+"""         self.led_board.flash_all_leds(self.led_duration)
+ """
+"""     def twinkle_leds(self):
+ """        """Call the LED Board and request the twinkling of all LEDs."""
+"""         self.led_board.twinkle_all_leds(self.led_duration)
+"""
 
 if __name__ == "__main__":
     #Runs fsm.main_loop from constructor

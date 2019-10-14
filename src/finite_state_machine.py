@@ -34,9 +34,7 @@ class FSM:
         self.state = rule.state2
         sig = signature(rule.action)
 
-        self.agent.led_board.flash_all_leds(2)
-
-        if(len(sig.parameters)==1) and not self.signal is None:
+        if len(sig.parameters) == 1 and not self.signal is None:
             rule.action(self.signal)
         else:
             rule.action()

@@ -3,7 +3,6 @@
 import time
 import RPi.GPIO as GPIO
 
-
 class LED:
     """The lED class"""
 
@@ -37,10 +36,8 @@ class LED:
     def flash_one_led(self, led_id, led_duration):
         """Flash one chosen of the 6 LEDs on for k seconds,
         where k is an argument of the method."""
-        timeout = led_duration  # [seconds]
-        timeout_start = time.time()
-        while time.time() < timeout_start + timeout:
-            self.light_led(led_id)
+        self.light_led(led_id)
+        time.sleep(led_duration)
         self.light_off_led()
 
     def light_off_led(self):
@@ -67,12 +64,12 @@ class LED:
         while time.time() < timeout_start + timeout:
             for i in range(6):
                 self.light_led(i)
-                time.sleep(0.01)
+                time.sleep(0.1)
         self.light_off_led()
 
     def leds_powering_up(self):
         """Flash LEDs at startup"""
-        timeout = 3  # [seconds]
+        timeout = 2  # [seconds]
         timeout_start = time.time()
         while time.time() < timeout_start + timeout:
             for i in [0, 4, 2]:
@@ -81,7 +78,7 @@ class LED:
 
     def leds_powering_down(self):
         """"Flash LEDs at shutdown"""
-        timeout = 3  # [seconds]
+        timeout = 2  # [seconds]
         timeout_start = time.time()
         while time.time() < timeout_start + timeout:
             for i in [1, 5, 3]:
