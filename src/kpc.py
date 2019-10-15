@@ -171,15 +171,6 @@ class KPC:
         LED Board and request that LED Lid be turned on for Ldur seconds."""
         self.led_board.flash_one_led(self.led_id, self.led_duration)
 
-"""     def flash_leds(self):
- """        """Call the LED Board and request the flashing of all LEDs."""
-"""         self.led_board.flash_all_leds(self.led_duration)
- """
-"""     def twinkle_leds(self):
- """        """Call the LED Board and request the twinkling of all LEDs."""
-"""         self.led_board.twinkle_all_leds(self.led_duration)
-"""
-
 if __name__ == "__main__":
     #Runs fsm.main_loop from constructor
     kpc = KPC()
